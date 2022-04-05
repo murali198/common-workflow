@@ -15,7 +15,7 @@ on:
       image_name:
         required: true
         type: string
-      image_name:
+      image_tag:
         required: false
         type: string
         default: "latest"
@@ -51,11 +51,11 @@ jobs:
 
       - name: setup image tag
         run: |
-          if [ -z "${{inputs.tag}}" ]
+          if [ -z "${{inputs.image_tag}}" ]
           then
             echo "final_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           else
-            echo "final_tag=${{inputs.tag}}" >> $GITHUB_ENV
+            echo "final_tag=${{inputs.image_tag}}" >> $GITHUB_ENV
           fi
 
       - name: Image build and push
