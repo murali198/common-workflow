@@ -1,0 +1,74 @@
+name: java-maven-build-acr
+
+on:
+  workflow_call:
+    inputs:
+      java_version:
+        required: true
+        type: string
+      java_distribution:
+        required: false
+        default: "temurin"
+      registry_name:
+        required: true
+        type: string
+      image_name:
+        required: true
+        type: string
+      image_name:
+        required: false
+        type: string
+        default: "latest"
+    secrets:
+      registry_username:
+        required: true
+      registry_password:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout the code
+
+      - name: setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: "${{inputs.java_version}}"
+          distribution: "${{inputs.java_distribution}}"
+
+      - name: Login ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{inputs.registry_name}}.azurecr.io
+          username: ${{ secrets.registry_username }}
+          password: ${{ secrets.registry_password }}
+
+      - name: Build with Maven
+        run: mvn clean install --file pom.xml
+
+      - name: setup image tag
+        run: |
+          if [ -z "${{inputs.tag}}" ]
+          then
+            echo "final_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          else
+            echo "final_tag=${{inputs.tag}}" >> $GITHUB_ENV
+          fi
+
+      - name: Image build and push
+        run: |
+          docker build . -t ${{inputs.registry_name}}.azurecr.io/${{inputs.image_name}}:${{ env.final_tag }}
+          docker push ${{inputs.registry_name}}.azurecr.io/${{inputs.image_name}}:${{ env.final_tag }}
+
+      - name: Create an issue
+        uses: JasonEtco/create-an-issue@v2.6.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ENVIRONMENT: Dev
+          RUNNUMBER: ${{ github.run_number  }}
+          TAG: ${{ steps.vars.outputs.sha_short }}
+        with:
+          filename: .github/deploy-issue-template.md
