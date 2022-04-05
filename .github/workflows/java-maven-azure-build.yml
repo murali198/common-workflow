@@ -9,6 +9,7 @@ on:
       java_distribution:
         required: false
         default: "temurin"
+        type: string
       registry_name:
         required: true
         type: string
