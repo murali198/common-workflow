@@ -19,7 +19,6 @@ on:
       image_tag:
         required: false
         type: string
-        default: "latest"
     secrets:
       registry_username:
         required: true
