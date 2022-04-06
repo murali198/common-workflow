@@ -58,7 +58,7 @@ jobs:
             echo "final_tag=${{inputs.image_tag}}" >> $GITHUB_ENV
           fi
 
-      - name: Image build and push
+      - name: Build and push image to ACR
         run: |
           docker build . -t ${{inputs.registry_name}}.azurecr.io/${{inputs.image_name}}:${{ env.final_tag }}
           docker push ${{inputs.registry_name}}.azurecr.io/${{inputs.image_name}}:${{ env.final_tag }}
