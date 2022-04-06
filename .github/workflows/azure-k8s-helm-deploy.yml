@@ -151,7 +151,7 @@ jobs:
           comment: "Deployment Completed 🌟"
 
       - name: Comment Issue
-        if: ${{ needs.deploy-dev.result != 'success' || needs.deploy-prod.result != 'success' }}
+        if: ${{ needs.deploy-dev.result == 'failure' || needs.deploy-prod.result == 'failure' }}
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.issue.number }}
