@@ -50,18 +50,13 @@ jobs:
         run: mvn clean install --file pom.xml
 
       - name: setup image tag
-        run: |
-          if [ -z "${{inputs.image_tag}}" ]
-          then
-            echo "final_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          else
-            echo "final_tag=${{inputs.image_tag}}" >> $GITHUB_ENV
-          fi
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
       - name: Build and push image to ACR
         run: |
-          docker build . -t ${{inputs.registry_name}}.azurecr.io/${{inputs.image_name}}:${{ env.final_tag }}
-          docker push ${{inputs.registry_name}}.azurecr.io/${{inputs.image_name}}:${{ env.final_tag }}
+          docker build . -t ${{inputs.registry_name}}.azurecr.io/${{inputs.image_name}}:${{ steps.vars.outputs.sha_short }}
+          docker push ${{inputs.registry_name}}.azurecr.io/${{inputs.image_name}}:${{ steps.vars.outputs.sha_short }}
 
       - name: Create an issue
         uses: JasonEtco/create-an-issue@v2.6.0
