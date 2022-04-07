@@ -75,46 +75,8 @@ jobs:
       - uses: actions/checkout@v3
         name: Checkout the code
 
-      - name: Get K8s context
-        uses: azure/aks-set-context@v1
-        with:
-          creds: ${{ secrets.azure_cred }}
-          cluster-name: ${{inputs.cluster_name}}
-          resource-group: ${{inputs.cluster_resource_group}}
-
-      - name: Create namespace if doesn't exist
-        run: |
-          kubectl create namespace ${{inputs.namespace}} --dry-run=client -o json | kubectl apply -f -
-
-      - name: Create K8s secret for pulling image from ACR
-        uses: Azure/k8s-create-secret@v1.1
-        with:
-          container-registry-url: ${{inputs.registry_name}}.azurecr.io
-          container-registry-username: ${{ secrets.registry_username }}
-          container-registry-password: ${{ secrets.registry_password }}
-          secret-name: ${{inputs.secret-name}}
-
-      - name: Bake deployment
-        uses: azure/k8s-bake@v2.1
-        with:
-          renderEngine: "helm"
-          helmChart: "${{inputs.chart_path}}"
-          overrideFiles: "${{inputs.helm_file}}"
-          helm-version: "${{inputs.helm_version}}"
-          releaseName: "${{inputs.release_name}}"
-          namespace: ${{inputs.namespace}}
-        id: bake
-
       - name: Deploy application to Dev
-        uses: Azure/k8s-deploy@v3.0
-        with:
-          action: deploy
-          manifests: ${{ steps.bake.outputs.manifestsBundle }}
-          images: |
-            ${{inputs.registry_name}}.azurecr.io/${{inputs.image_name}}:${{ needs.parse.outputs.image-tag }}
-          imagepullsecrets: |
-            ${{inputs.secret-name}}
-          namespace: ${{inputs.namespace}}
+        run: echo deploying app
 
       - uses: JasonEtco/create-an-issue@v2
         name: Create approval Issue for Prod
