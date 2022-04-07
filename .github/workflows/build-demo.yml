@@ -1,0 +1,57 @@
+name: java-maven-build-acr
+
+on:
+  workflow_call:
+    inputs:
+      java_version:
+        required: true
+        type: string
+      java_distribution:
+        required: false
+        default: "temurin"
+        type: string
+      registry_name:
+        required: true
+        type: string
+      image_name:
+        required: true
+        type: string
+      image_tag:
+        required: false
+        type: string
+    secrets:
+      registry_username:
+        required: true
+      registry_password:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout the code
+
+      - name: setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: "${{inputs.java_version}}"
+          distribution: "${{inputs.java_distribution}}"
+
+      - name: Build with Maven
+        run: echo building app
+
+      - name: setup image tag
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+      - name: Create an issue
+        uses: JasonEtco/create-an-issue@v2.6.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ENVIRONMENT: Dev
+          RUNNUMBER: ${{ github.run_number  }}
+          TAG: ${{ steps.vars.outputs.sha_short }}
+        with:
+          filename: .github/deploy-issue-template.md
