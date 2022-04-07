@@ -19,6 +19,10 @@ on:
       image_tag:
         required: false
         type: string
+      runs_on:
+        required: false
+        type: string
+        default: ubuntu-latest
     secrets:
       registry_username:
         required: true
@@ -27,7 +31,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ${{inputs.runs_on}}
 
     steps:
       - uses: actions/checkout@v3

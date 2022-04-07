@@ -35,6 +35,10 @@ on:
       helm_file:
         required: false
         type: string
+      runs_on:
+        required: false
+        type: string
+        default: ubuntu-latest
     secrets:
       azure_cred:
         required: true
@@ -45,7 +49,7 @@ on:
 jobs:
   parse:
     if: ${{ !github.event.issue.pull_request && github.event.comment.body == '/Approved' }}
-    runs-on: self-hosted
+    runs-on: ${{inputs.runs_on}}
     outputs:
       deploy-environment: ${{ fromJSON(steps.issue_body_parser.outputs.payload).environment }}
       ci-run-number: ${{ fromJSON(steps.issue_body_parser.outputs.payload).runNumber }}
@@ -68,7 +72,7 @@ jobs:
   deploy-dev:
     needs: [parse]
     if: ${{ needs.parse.outputs.deploy-environment == 'Dev' }}
-    runs-on: self-hosted
+    runs-on: ${{inputs.runs_on}}
 
     steps:
       - uses: actions/checkout@v3
@@ -128,7 +132,7 @@ jobs:
   deploy-prod:
     needs: [parse]
     if: ${{ needs.parse.outputs.deploy-environment == 'Prod' }}
-    runs-on: self-hosted
+    runs-on: ${{inputs.runs_on}}
 
     steps:
       - uses: actions/checkout@v3
@@ -140,7 +144,7 @@ jobs:
   close-issue:
     needs: [deploy-dev, deploy-prod]
     if: ${{ always() }}
-    runs-on: self-hosted
+    runs-on: ${{inputs.runs_on}}
 
     steps:
       - name: Close Issue
