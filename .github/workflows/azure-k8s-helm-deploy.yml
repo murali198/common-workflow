@@ -73,6 +73,8 @@ jobs:
     needs: [parse]
     if: ${{ needs.parse.outputs.deploy-environment == 'Dev' }}
     runs-on: ${{inputs.runs_on}}
+    environment:
+      name: dev
 
     steps:
       - uses: actions/checkout@v3
