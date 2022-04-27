@@ -58,11 +58,11 @@ jobs:
         run: |
           if [ "${{inputs.image_tag}}"  == "" ]
           then
-            TAGS='$(git rev-parse --short HEAD)'
+            TAGS="$(git rev-parse --short HEAD)"
           else
-            TAGS='${{inputs.image_tag}}'
+            TAGS="${{inputs.image_tag}}"
           fi
-          echo '::set-output name=sha_short::'$TAGS
+          echo "::set-output name=sha_short::$TAGS"
 
       - name: Build and push image to ACR
         run: |
