@@ -55,7 +55,13 @@ jobs:
 
       - name: setup image tag
         id: vars
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        run: |
+          if [ -z "${{inputs.image_tag}}" ]
+          then
+            echo "::set-output name=sha-short::$(git rev-parse --short HEAD)"
+          else
+            echo "::set-output name=sha-short::${{inputs.image_tag}}"
+          fi
 
       - name: Build and push image to ACR
         run: |
